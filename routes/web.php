@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reviews/{user}', [ReviewController::class, 'index'])->name('reviews.index');
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
-    Route::prefix('/admin')->group(function () {
+    Route::prefix('/admin')->middleware('can:admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::patch('/users/{user}/ban', [AdminController::class, 'banUser'])->name('admin.users.ban');
         Route::patch('/users/{user}/unban', [AdminController::class, 'unbanUser'])->name('admin.users.unban');

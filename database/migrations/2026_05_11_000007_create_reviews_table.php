@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('session_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('session_id')->constrained('skill_sessions')->cascadeOnDelete();
             $table->foreignId('reviewer_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('reviewed_user_id')->constrained('users')->cascadeOnDelete();
             $table->unsignedTinyInteger('rating');

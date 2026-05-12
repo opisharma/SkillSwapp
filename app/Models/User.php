@@ -38,6 +38,28 @@ class User extends Authenticatable
         return $this->hasMany(UserSkill::class);
     }
 
+    public function matchesAsOne(): HasMany
+    {
+        return $this->hasMany(SkillMatch::class, 'user_one_id');
+    }
+
+    public function matchesAsTwo(): HasMany
+    {
+        return $this->hasMany(SkillMatch::class, 'user_two_id');
+    }
+
+    /**
+     * Get all matches where the user is either user_one or user_two.
+     * Returns a Collection (not an Eloquent relation) for convenience.
+     */
+    public function allMatches()
+    {
+        return SkillMatch::query()
+            ->where('user_one_id', $this->id)
+            ->orWhere('user_two_id', $this->id)
+            ->get();
+    }
+
     public function sentMessages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');

@@ -1,0 +1,1 @@
+{"version":2,"defects":{"Tests\\Unit\\SessionServiceTest::test_session_creation_works":8,"Tests\\Feature\\AuthenticationTest::test_registered_user_can_access_dashboard":8,"Tests\\Feature\\MatchEngineTest::test_mutual_skill_match_is_generated":8},"times":[]}

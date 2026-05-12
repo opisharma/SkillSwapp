@@ -20,8 +20,14 @@ class MatchService
             return;
         }
 
+        $relevantSkillIds = array_values(array_unique(array_merge($myTeach, $myLearn)));
+
         $candidates = User::query()
             ->where('id', '!=', $user->id)
+            ->where('is_banned', false)
+            ->whereHas('userSkills', function ($q) use ($relevantSkillIds) {
+                $q->whereIn('skill_id', $relevantSkillIds);
+            })
             ->with('userSkills')
             ->get();
 
