@@ -11,9 +11,11 @@ class MatchRepository implements MatchRepositoryInterface
     public function forUser(int $userId): Collection
     {
         return SkillMatch::query()
+            ->where(function ($query) use ($userId) {
+                $query->where('user_one_id', $userId)
+                      ->orWhere('user_two_id', $userId);
+            })
             ->with(['userOne', 'userTwo'])
-            ->where('user_one_id', $userId)
-            ->orWhere('user_two_id', $userId)
             ->orderByDesc('match_percentage')
             ->get();
     }

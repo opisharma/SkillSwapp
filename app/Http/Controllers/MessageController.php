@@ -8,6 +8,7 @@ use App\Models\SkillMatch;
 use App\Services\MessagingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,14 +18,14 @@ class MessageController extends Controller
     {
     }
 
-    public function index(SkillMatch $match): Response
+    public function index(Request $request, SkillMatch $match): Response
     {
         $this->authorize('view', $match);
-        $this->messagingService->markConversationAsRead($match, auth()->user());
+        $this->messagingService->markConversationAsRead($match, $request->user());
 
         return Inertia::render('Chat/Index', [
             'match' => $match->load(['userOne', 'userTwo']),
-            'messages' => MessageResource::collection($match->messages()->latest()->take(100)->get()->reverse()->values()),
+            'messages' => MessageResource::collection($match->messages()->latest()->take(100)->get()->reverse()->values())->resolve(request()),
         ]);
     }
 
@@ -43,7 +44,7 @@ class MessageController extends Controller
         $this->authorize('view', $match);
 
         return response()->json([
-            'data' => MessageResource::collection($match->messages()->latest()->take(100)->get()->reverse()->values()),
+            'data' => MessageResource::collection($match->messages()->latest()->take(100)->get()->reverse()->values())->resolve(request()),
         ]);
     }
 }
