@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import NotificationBell from '../Components/NotificationBell';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard' },
@@ -12,6 +13,7 @@ const navItems = [
 export default function AppLayout({ children }) {
   const { url, props } = usePage();
   const user = props?.auth?.user;
+  const notifications = props?.notifications ?? { unreadCount: 0, recent: [] };
 
   return (
     <div className="min-h-screen">
@@ -32,6 +34,14 @@ export default function AppLayout({ children }) {
                 </Link>
               ))}
             </nav>
+
+            {user ? (
+              <NotificationBell
+                userId={user.id}
+                initialUnreadCount={notifications.unreadCount ?? 0}
+                initialNotifications={notifications.recent ?? []}
+              />
+            ) : null}
 
             {user ? (
               <Link
