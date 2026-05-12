@@ -8,6 +8,7 @@
         <title inertia>{{ config('app.name', 'SkillSwap') }}</title>
 
         @viteReactRefresh
+        @routes
         @vite(['resources/js/app.jsx'])
         @inertiaHead
     </head>
