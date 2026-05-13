@@ -37,6 +37,39 @@ export default function NotificationBell({ userId, initialUnreadCount = 0, initi
     };
   }, [userId]);
 
+  // Fallback: listen for global chat events and create a notification when addressed to this user
+  useEffect(() => {
+    if (!userId) return undefined;
+
+    const handler = (e) => {
+      const payload = e?.detail || null;
+      if (!payload || payload.receiver_id !== userId) return;
+
+      const notification = {
+        id: `msg-${payload.id}`,
+        user_id: userId,
+        type: 'message.received',
+        title: `New message from ${payload.sender?.name ?? 'Someone'}`,
+        body: payload.body || '',
+        data: {
+          match_id: payload.match_id,
+          message_id: payload.id,
+          sender_id: payload.sender_id,
+          sender_name: payload.sender?.name,
+        },
+        link: `/chat/${payload.match_id}`,
+        read_at: null,
+        created_at: payload.created_at,
+      };
+
+      setUnreadCount((current) => current + 1);
+      setNotifications((current) => [notification, ...current].slice(0, 5));
+    };
+
+    window.addEventListener('chat:message', handler);
+    return () => window.removeEventListener('chat:message', handler);
+  }, [userId]);
+
   const markAllRead = () => {
     router.post(route('notifications.read-all'), {}, {
       preserveScroll: true,

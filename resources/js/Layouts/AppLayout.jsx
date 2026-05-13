@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import NotificationBell from '../Components/NotificationBell';
 
@@ -14,6 +14,52 @@ export default function AppLayout({ children }) {
   const { url, props } = usePage();
   const user = props?.auth?.user;
   const notifications = props?.notifications ?? { unreadCount: 0, recent: [] };
+  const [subscribed, setSubscribed] = useState(false);
+
+  useEffect(() => {
+    if (!user || !window.Echo || subscribed) return;
+
+    let channels = [];
+
+    (async () => {
+      try {
+        const res = await window.fetch('/api/matches', { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) return;
+        const payload = await res.json();
+        const matches = Array.isArray(payload) ? payload : payload.data || [];
+
+        matches.forEach((match) => {
+          const name = `chat.${match.id}`;
+          const channel = window.Echo.private(name);
+          channel.listen('.message.sent', (data) => {
+            // Broadcast a DOM-level event so any component can react
+            try {
+              window.dispatchEvent(new window.CustomEvent('chat:message', { detail: data }));
+            } catch (e) {
+              // Older browsers
+              const ev = document.createEvent('CustomEvent');
+              ev.initCustomEvent('chat:message', false, false, data);
+              window.dispatchEvent(ev);
+            }
+          });
+
+          channels.push(name);
+        });
+
+        setSubscribed(true);
+      } catch (err) {
+        console.error('Failed to subscribe to chat channels:', err);
+      }
+    })();
+
+    return () => {
+      try {
+        channels.forEach((name) => window.Echo.leave(name));
+      } catch (e) {
+        // ignore
+      }
+    };
+  }, [user, subscribed]);
 
   return (
     <div className="min-h-screen">

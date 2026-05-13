@@ -29,7 +29,15 @@ class NotificationService
             ],
         ]);
 
-        MessageNotificationCreated::dispatch($this->toPayload($notification));
+        try {
+            MessageNotificationCreated::dispatch($this->toPayload($notification));
+        } catch (\Throwable $throwable) {
+            logger()->warning('MessageNotificationCreated broadcast failed.', [
+                'notification_id' => $notification->id,
+                'user_id' => $receiver->id,
+                'error' => $throwable->getMessage(),
+            ]);
+        }
 
         return $notification;
     }

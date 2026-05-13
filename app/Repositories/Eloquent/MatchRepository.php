@@ -15,7 +15,13 @@ class MatchRepository implements MatchRepositoryInterface
                 $query->where('user_one_id', $userId)
                       ->orWhere('user_two_id', $userId);
             })
-            ->with(['userOne', 'userTwo'])
+            ->with([
+                'userOne',
+                'userTwo',
+                'messages' => function ($query) {
+                    $query->latest('created_at')->limit(1);
+                },
+            ])
             ->orderByDesc('match_percentage')
             ->get();
     }
